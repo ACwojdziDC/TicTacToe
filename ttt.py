@@ -1,4 +1,8 @@
+import sys
+import random
+
 def init_board():
+    
     board = []
     for i in range (0,3):
         board.append([".",".","."])
@@ -10,7 +14,10 @@ def get_move(board, player): # do naprawienia błąd jeśli drugi znak nie jest 
     print("Podaj współrzędne na których umiescisz swój znak:",player)
     input_user = input()
     input_user = input_user.lower()
-    if len(input_user) != 2:
+    if input_user == 'quit':
+        print("Do zobaczenia !!!")
+        sys.exit()
+    elif len(input_user) != 2:
         print("Podałeś niewłaściwą ilość znaków")
         get_move(board,player)
     else :
@@ -24,21 +31,18 @@ def get_move(board, player): # do naprawienia błąd jeśli drugi znak nie jest 
         row = 1
     elif row == "c":
         row = 2
-    else:
-        pass
+    
     
     if input_user not in ["a1","a2","a3","b1","b2","b3","c1","c2","c3"]:
         print("Podałeś złe współrzędne, spróbuj jeszcze raz : ")
-        get_move(board,player)
+        row,col = get_move(board, player)
     elif board[row][col-1] != ".":
         print("Podałeś współrzędne na których już znajduje się jakiś znak : ")
-        get_move(board,player)
-    else:
-        pass
+        row,col = get_move(board, player)
+    
     return row, col
 
 def mark(board, player, row, col):
-    
     board[row][col-1] = player
 
 def has_won(board,player): #dlaczego na starcie jest False?
@@ -112,13 +116,31 @@ def tictactoe():
     while has_won(board, player) == False and is_full(board) == False :
         if user_count%2 == 1:
             player = 'x'
+            row,col = get_move(board, player)
         else:
             player = 'o'
-        row,col = get_move(board, player)
+            row,col = get_ai_move(board)
+        
         mark(board, player, row, col)
         print_board(board)
         user_count += 1
     print_result(user_count)
+
+def get_ai_move(board):
+    good = False
+    while good == False:
+        chose=[0,0]
+        chose[0]=random.randint(0,2)
+        chose[1]=random.randint(1,3)
+        if board[chose[0]][chose[1]-1] == ".":
+            row = chose[0]
+            col = int(chose[1])
+            good = True
+        else :
+            print("komputer Z wybrał: ",chose)
+
+    print("komputer wybrał: ",chose)
+    return chose[0],chose[1]   
 
 
 
