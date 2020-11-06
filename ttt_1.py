@@ -23,7 +23,7 @@ def get_move(board, player): # do naprawienia błąd jeśli drugi znak nie jest 
     else :
         
         row = input_user[0]
-        col = int(input_user[1])
+        col = int(input_user[1])-1
     
     if row == "a":
         row = 0
@@ -36,14 +36,14 @@ def get_move(board, player): # do naprawienia błąd jeśli drugi znak nie jest 
     if input_user not in ["a1","a2","a3","b1","b2","b3","c1","c2","c3"]:
         print("Podałeś złe współrzędne, spróbuj jeszcze raz : ")
         row,col = get_move(board, player)
-    elif board[row][col-1] != ".":
+    elif board[row][col] != ".":
         print("Podałeś współrzędne na których już znajduje się jakiś znak : ")
         row,col = get_move(board, player)
     
     return row, col
 
 def mark(board, player, row, col):
-    board[row][col-1] = player
+    board[row][col] = player
 
 def has_won(board,player): #dlaczego na starcie jest False?
     
@@ -106,7 +106,58 @@ def print_result(winner):
             print("O has won!")
         else:
             print("X has won!")
-        
+
+def find_hot(board,player,hot_place):
+    
+    for i in range (0,3):
+        result =0
+        temp = [[".","."]]      
+        for j in range (0,3):            
+            if board[i][j] == player:
+                result += 1
+            if board[i][j] == ".":
+                temp[0] = (i,j)                
+        if result == 2 and temp != [[".","."]]:
+            hot_place[0] = temp[0]
+            return True
+            
+    for i in range (0,3):        
+        result =0
+        temp = [[".","."]]
+        for j in range (0,3):            
+            if board[j][i] == player:
+                result += 1
+            if board[j][i] == ".":
+                temp[0] = (j,i)                
+        if result == 2 and temp != [[".","."]]:
+            hot_place[0] = temp[0]
+            return True
+    
+    result = 0
+    temp = [[".","."]]
+    for i in range (0,3):
+        if board[i][i] == player:
+            result += 1
+        if board[i][i] == ".":
+            temp[0] = (i,i)            
+    if result == 2 and temp != [[".","."]]:
+        hot_place[0] = temp[0]
+        return True
+
+    result = 0
+    j = 2
+    temp = [[".","."]]
+    for i in range (0,3):
+        if board[i][j] == player:
+            result += 1
+        if board[i][j] == ".":
+            temp[0] = (i,j)            
+        j -= 1
+    if result == 2 and temp != [[".","."]]:
+        hot_place[0] = temp[0]
+        return True
+    hot_place[0] = [[".","."]]  
+    return False        
 
 def tictactoe():
     board = init_board()
@@ -119,38 +170,40 @@ def tictactoe():
             row,col = get_move(board, player)
         else:
             player = 'o'
-            row,col = get_ai_move(board)
+            row,col = get_ai_move(board,player)
         
         mark(board, player, row, col)
         print_board(board)
-        print("")
         user_count += 1
     print_result(user_count)
 
-def get_ai_move(board):
+def get_ai_move(board,player):
     good = False
+    hot_place =[[".","."]]
+    if find_hot(board,player,hot_place) is False:
+        find_hot(board,"x",hot_place)
     while good == False:
-        chose=[0,0]
-        chose[0]=random.randint(0,2)
-        chose[1]=random.randint(1,3)
-        if board[chose[0]][chose[1]-1] == ".":
-            row = chose[0]
-            col = int(chose[1])
+        if hot_place[0] != [[".","."]]:
+            row = int(hot_place[0][0])
+            col = int(hot_place[0][1])
             good = True
         else :
-            pass
+            chose=[0,0]
+            chose[0]=random.randint(0,2)
+            chose[1]=random.randint(0,2)
+            if board[chose[0]][chose[1]] == ".":
+                row = int(chose[0])
+                col = int(chose[1])
+                good = True
+            else :
+                print("komputer Z wybrał: ",chose)
 
-    print("komputer wybrał: ",chose)
-    return chose[0],chose[1]   
-
+    print("komputer wybrał: ",row,col)
+    return row,col   
+    # do poprawy sprawdzenie czy pole jest puste w przypadku hot
 
 
 tictactoe()
 
-# board = init_board()
-# row,col = get_move(board, player)
-# mark(board, player, row, col)
-# if has_won(board,player):
-#     print("wygrałeś")
-# print_board(board)
+
 
